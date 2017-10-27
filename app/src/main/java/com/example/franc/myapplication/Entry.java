@@ -22,6 +22,8 @@ public class Entry extends Object {
         ID = x;
     }
 
+    public int getID() { return ID; };
+
     public String getTitle() {
         return title;
     }
