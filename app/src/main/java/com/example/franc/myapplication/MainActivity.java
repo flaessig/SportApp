@@ -1,11 +1,13 @@
 package com.example.franc.myapplication;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.preference.PreferenceManager;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -51,6 +53,9 @@ public class MainActivity extends AppCompatActivity
     ArrayList<Entry> places;
     private HashMap<Marker, Entry> markerMap;
     private boolean listViewDisplayed = false;
+    FloatingActionButton fab;
+    Button applyFiltersButton;
+    SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +67,8 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Find Events");
 
-        //actionbutton
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        //buttons
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -71,6 +76,7 @@ public class MainActivity extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         });
+        applyFiltersButton = (Button) findViewById(R.id.apply_filters_button);
 
         //drawerlayout
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -83,6 +89,9 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
+        //settings
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String myString = prefs.getString("key2",null);
 
 
         //map
@@ -158,6 +167,17 @@ public class MainActivity extends AppCompatActivity
         fragmentTransaction.show(frag);
         currentFragment = frag;
         fragmentTransaction.commit();
+
+        if(!frag.equals(mapFragment)) {
+            fab.setVisibility(View.INVISIBLE);
+        } else {
+            fab.setVisibility(View.VISIBLE);
+        }
+        if(!frag.equals(filters)) {
+            applyFiltersButton.setVisibility(View.INVISIBLE);
+        } else {
+            applyFiltersButton.setVisibility(View.VISIBLE);
+        }
         listViewDisplayed = false;
     }
 
