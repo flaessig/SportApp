@@ -77,6 +77,11 @@ public class MainActivity extends AppCompatActivity
             }
         });
         applyFiltersButton = (Button) findViewById(R.id.apply_filters_button);
+        applyFiltersButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                applyFilters();
+            }
+        });
 
         //drawerlayout
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -198,6 +203,9 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+
+
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -288,6 +296,16 @@ public class MainActivity extends AppCompatActivity
         Entry currEntry = places.get(position);
         Toast.makeText(this, currEntry.getTitle(), Toast.LENGTH_LONG).show();
         mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(currEntry.getLat(), currEntry.getLng())));
+    }
+
+    public void applyFilters() {
+        boolean swimmingEnabled = prefs.getBoolean("keySwimming", false);
+        boolean runningEnabled = prefs.getBoolean("keyRunning", false);
+
+
+
+        Toast.makeText(this, "Filters applied", Toast.LENGTH_LONG).show();
+        changeFragment(mapFragment);
     }
 
 }
