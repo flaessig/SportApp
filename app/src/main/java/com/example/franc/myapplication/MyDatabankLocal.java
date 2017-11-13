@@ -16,6 +16,8 @@ public class MyDatabankLocal implements MyDatabank {
         data.add(entry);
     }
 
+    //TODO: add a method to return only entries with right criteria
+
     @Override
     public Entry getEntry(int id) {
         return data.get(id);

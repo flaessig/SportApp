@@ -302,7 +302,7 @@ public class MainActivity extends AppCompatActivity
         boolean swimmingEnabled = prefs.getBoolean("keySwimming", false);
         boolean runningEnabled = prefs.getBoolean("keyRunning", false);
 
-
+        //TODO: complete method
 
         Toast.makeText(this, "Filters applied", Toast.LENGTH_LONG).show();
         changeFragment(mapFragment);
