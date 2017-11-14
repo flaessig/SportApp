@@ -1,9 +1,12 @@
 package com.example.franc.myapplication;
 
+import android.app.Activity;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.sql.Time;
 import java.util.Calendar;
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
 
 /**
@@ -21,9 +24,8 @@ public class Entry extends Object {
     private int numberMax;
     private int numberJoined;
     private String cost;
-    private boolean swimming;
-    private boolean running;
-    //TODO: figure out how to best save criteria (types)
+
+    private EnumSet<ActivityType> types;
 
     public Entry(String title, double lat, double lng) {
         this.title = title;
@@ -36,8 +38,7 @@ public class Entry extends Object {
         numberMax = 20;
         cost = "free";
 
-        swimming = true;
-        running = true;
+
     }
 
     public void setID(int x) {
@@ -65,8 +66,14 @@ public class Entry extends Object {
         String costString = "Cost: " + cost;
         return costString;
     }
-    public boolean getSwimming() {return swimming;}
-    public boolean getRunning() {return running;}
+
+
+    public boolean hasTypeIn(EnumSet<ActivityType> set) {
+        for(ActivityType type : types) {
+            if(set.contains(type)) return true;
+        }
+        return false;
+    }
     @Override
     public String toString()    {
         return getTitle();

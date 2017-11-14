@@ -37,8 +37,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener, AdapterView.OnItemClickListener {
@@ -50,7 +54,7 @@ public class MainActivity extends AppCompatActivity
     BlankFragment bfrag = new BlankFragment();
     FilterFragment filters = new FilterFragment();
     Fragment currentFragment;
-    ArrayList<Entry> places;
+    ArrayList<Entry> currentEntries;
     private HashMap<Marker, Entry> markerMap;
     private boolean listViewDisplayed = false;
     FloatingActionButton fab;
@@ -131,14 +135,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        places = databank.returnAll();
+        currentEntries = databank.returnAll();
 
         //sets id to position in list
-        for (int i = 0; i < places.size(); i++) {
-            places.get(i).setID(i);
+        for (int i = 0; i < currentEntries.size(); i++) {
+            currentEntries.get(i).setID(i);
         }
 
-        entriesToMap(mMap, places);
+        entriesToMap(mMap, currentEntries);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(47.3904, 8.0457)));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
         mMap.setOnMarkerClickListener(this);
@@ -194,7 +198,7 @@ public class MainActivity extends AppCompatActivity
         android.widget.ListView.LayoutParams params = new android.widget.ListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300 /*ViewGroup.LayoutParams.WRAP_CONTENTViewGroup.LayoutParams.WRAP_CONTENT*/);
         list.setLayoutParams(params);
         ((FrameLayout) frameLayout).addView(list);
-        EntryAdapter myAdapter = new EntryAdapter(this, places);
+        EntryAdapter myAdapter = new EntryAdapter(this, currentEntries);
 
         list.setAdapter(myAdapter);
         list.setBackgroundColor(Color.WHITE);
@@ -293,7 +297,7 @@ public class MainActivity extends AppCompatActivity
     // handle click in list
     @Override
     public void onItemClick (AdapterView<?> arg0, View arg1,int position, long arg3) {
-        Entry currEntry = places.get(position);
+        Entry currEntry = currentEntries.get(position);
         Toast.makeText(this, currEntry.getTitle(), Toast.LENGTH_LONG).show();
         mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(currEntry.getLat(), currEntry.getLng())));
     }
@@ -301,6 +305,16 @@ public class MainActivity extends AppCompatActivity
     public void applyFilters() {
         boolean swimmingEnabled = prefs.getBoolean("keySwimming", false);
         boolean runningEnabled = prefs.getBoolean("keyRunning", false);
+        boolean bootcampEnabled = prefs.getBoolean("keyBootcamp", false);
+
+        EnumSet<ActivityType> activityTypes = EnumSet.noneOf(ActivityType.class);
+
+        if(swimmingEnabled) activityTypes.add(ActivityType.SWIMMING);
+        if(runningEnabled) activityTypes.add(ActivityType.RUNNING);
+        if(bootcampEnabled) activityTypes.add(ActivityType.BOOTCAMP);
+
+        currentEntries = databank.returnSelected(activityTypes);
+        entriesToMap(mMap, currentEntries);
 
         //TODO: complete method
 

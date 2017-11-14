@@ -21,6 +21,12 @@
                 android:summary="CheckBox Summary"
                 android:defaultValue="true"/>
 
+            <android.support.v7.preference.CheckBoxPreference
+                android:key="keyBootcamp"
+                android:title="Bootcamp"
+                android:summary="CheckBox Summary"
+                android:defaultValue="true"/>
+
         </android.support.v7.preference.PreferenceCategory>
 
 
