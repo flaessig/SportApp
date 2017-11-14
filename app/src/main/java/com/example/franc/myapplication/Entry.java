@@ -37,6 +37,7 @@ public class Entry extends Object {
         numberJoined = 4;
         numberMax = 20;
         cost = "free";
+        types = EnumSet.noneOf(ActivityType.class);
 
 
     }

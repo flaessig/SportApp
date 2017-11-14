@@ -314,6 +314,7 @@ public class MainActivity extends AppCompatActivity
         if(bootcampEnabled) activityTypes.add(ActivityType.BOOTCAMP);
 
         currentEntries = databank.returnSelected(activityTypes);
+        mMap.clear();
         entriesToMap(mMap, currentEntries);
 
         //TODO: complete method
