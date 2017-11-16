@@ -1,11 +1,13 @@
 package com.example.franc.myapplication;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.preference.PreferenceManager;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -35,8 +37,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener, AdapterView.OnItemClickListener {
@@ -48,9 +51,13 @@ public class MainActivity extends AppCompatActivity
     BlankFragment bfrag = new BlankFragment();
     FilterFragment filters = new FilterFragment();
     Fragment currentFragment;
-    ArrayList<Entry> places;
+    NewActivityFragment newAct;
+    ArrayList<Entry> currentEntries;
     private HashMap<Marker, Entry> markerMap;
     private boolean listViewDisplayed = false;
+    FloatingActionButton fab;
+    Button applyFiltersButton;
+    SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,15 +69,22 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Find Events");
 
-        //actionbutton
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        //buttons
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                changeFragment(newAct);
+                getSupportActionBar().setTitle("Create Activity");
             }
         });
+        applyFiltersButton = (Button) findViewById(R.id.apply_filters_button);
+        applyFiltersButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                applyFilters();
+            }
+        });
+        applyFiltersButton.setVisibility(View.INVISIBLE);
 
         //drawerlayout
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -83,6 +97,9 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
+        //settings
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String myString = prefs.getString("key2",null);
 
 
         //map
@@ -90,7 +107,8 @@ public class MainActivity extends AppCompatActivity
         mapFragment.getMapAsync(this);
 
 
-
+        //newactivity fragment
+        newAct = new NewActivityFragment();
 
 
         databank = new MyDatabankLocal();
@@ -108,8 +126,10 @@ public class MainActivity extends AppCompatActivity
         fragmentTransaction.add(R.id.myownframe, bfrag);
         fragmentTransaction.add(R.id.myownframe, mapFragment);
         fragmentTransaction.add(R.id.myownframe, filters);
+        fragmentTransaction.add(R.id.myownframe, newAct);
         fragmentTransaction.hide(bfrag);
         fragmentTransaction.hide(filters);
+        fragmentTransaction.hide(newAct);
         fragmentTransaction.commit();
         currentFragment = mapFragment;
     }
@@ -117,14 +137,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        places = databank.returnAll();
+        currentEntries = databank.returnAll();
 
         //sets id to position in list
-        for (int i = 0; i < places.size(); i++) {
-            places.get(i).setID(i);
+        for (int i = 0; i < currentEntries.size(); i++) {
+            currentEntries.get(i).setID(i);
         }
 
-        entriesToMap(mMap, places);
+        entriesToMap(mMap, currentEntries);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(47.3904, 8.0457)));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
         mMap.setOnMarkerClickListener(this);
@@ -158,6 +178,18 @@ public class MainActivity extends AppCompatActivity
         fragmentTransaction.show(frag);
         currentFragment = frag;
         fragmentTransaction.commit();
+
+        if(!frag.equals(mapFragment)) {
+            fab.setVisibility(View.INVISIBLE);
+        } else {
+            getSupportActionBar().setTitle("Find Activities");
+            fab.setVisibility(View.VISIBLE);
+        }
+        if(!frag.equals(filters)) {
+            applyFiltersButton.setVisibility(View.INVISIBLE);
+        } else {
+            applyFiltersButton.setVisibility(View.VISIBLE);
+        }
         listViewDisplayed = false;
     }
 
@@ -169,7 +201,7 @@ public class MainActivity extends AppCompatActivity
         android.widget.ListView.LayoutParams params = new android.widget.ListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300 /*ViewGroup.LayoutParams.WRAP_CONTENTViewGroup.LayoutParams.WRAP_CONTENT*/);
         list.setLayoutParams(params);
         ((FrameLayout) frameLayout).addView(list);
-        EntryAdapter myAdapter = new EntryAdapter(this, places);
+        EntryAdapter myAdapter = new EntryAdapter(this, currentEntries);
 
         list.setAdapter(myAdapter);
         list.setBackgroundColor(Color.WHITE);
@@ -178,11 +210,16 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+
+
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if(!currentFragment.equals(mapFragment)){
+            changeFragment(mapFragment);
         } else {
             super.onBackPressed();
         }
@@ -223,16 +260,16 @@ public class MainActivity extends AppCompatActivity
 
         if  (id == R.id.nav_myevents) {
             changeFragment(bfrag);
-            getSupportActionBar().setTitle("My Events");
+            getSupportActionBar().setTitle("My Activities");
 
         } else if (id == R.id.nav_joinedevents) {
             changeFragment(bfrag);
-            getSupportActionBar().setTitle("Joined Events");
+            getSupportActionBar().setTitle("Joined Activities");
 
         } else if (id == R.id.nav_search) {
             changeFragment(mapFragment);
-            setupList();
-            getSupportActionBar().setTitle("Find Events");
+            //setupList();
+            getSupportActionBar().setTitle("Find Activities");
         }
 
 
@@ -265,9 +302,30 @@ public class MainActivity extends AppCompatActivity
     // handle click in list
     @Override
     public void onItemClick (AdapterView<?> arg0, View arg1,int position, long arg3) {
-        Entry currEntry = places.get(position);
+        Entry currEntry = currentEntries.get(position);
         Toast.makeText(this, currEntry.getTitle(), Toast.LENGTH_LONG).show();
         mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(currEntry.getLat(), currEntry.getLng())));
+    }
+
+    public void applyFilters() {
+        boolean swimmingEnabled = prefs.getBoolean("keySwimming", false);
+        boolean runningEnabled = prefs.getBoolean("keyRunning", false);
+        boolean bootcampEnabled = prefs.getBoolean("keyBootcamp", false);
+
+        EnumSet<ActivityType> activityTypes = EnumSet.noneOf(ActivityType.class);
+
+        if(swimmingEnabled) activityTypes.add(ActivityType.SWIMMING);
+        if(runningEnabled) activityTypes.add(ActivityType.RUNNING);
+        if(bootcampEnabled) activityTypes.add(ActivityType.BOOTCAMP);
+
+        currentEntries = databank.returnSelected(activityTypes);
+        mMap.clear();
+        entriesToMap(mMap, currentEntries);
+
+        //TODO: complete method
+
+        Toast.makeText(this, "Filters applied", Toast.LENGTH_LONG).show();
+        changeFragment(mapFragment);
     }
 
 }
