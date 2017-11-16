@@ -39,10 +39,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener, AdapterView.OnItemClickListener {
@@ -54,6 +51,7 @@ public class MainActivity extends AppCompatActivity
     BlankFragment bfrag = new BlankFragment();
     FilterFragment filters = new FilterFragment();
     Fragment currentFragment;
+    NewActivityFragment newAct;
     ArrayList<Entry> currentEntries;
     private HashMap<Marker, Entry> markerMap;
     private boolean listViewDisplayed = false;
@@ -76,16 +74,17 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                changeFragment(newAct);
             }
         });
         applyFiltersButton = (Button) findViewById(R.id.apply_filters_button);
         applyFiltersButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 applyFilters();
+                getSupportActionBar().setTitle("Create Activity");
             }
         });
+        applyFiltersButton.setVisibility(View.INVISIBLE);
 
         //drawerlayout
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -108,7 +107,8 @@ public class MainActivity extends AppCompatActivity
         mapFragment.getMapAsync(this);
 
 
-
+        //newactivity fragment
+        newAct = new NewActivityFragment();
 
 
         databank = new MyDatabankLocal();
@@ -126,8 +126,10 @@ public class MainActivity extends AppCompatActivity
         fragmentTransaction.add(R.id.myownframe, bfrag);
         fragmentTransaction.add(R.id.myownframe, mapFragment);
         fragmentTransaction.add(R.id.myownframe, filters);
+        fragmentTransaction.add(R.id.myownframe, newAct);
         fragmentTransaction.hide(bfrag);
         fragmentTransaction.hide(filters);
+        fragmentTransaction.hide(newAct);
         fragmentTransaction.commit();
         currentFragment = mapFragment;
     }
@@ -180,6 +182,7 @@ public class MainActivity extends AppCompatActivity
         if(!frag.equals(mapFragment)) {
             fab.setVisibility(View.INVISIBLE);
         } else {
+            getSupportActionBar().setTitle("Find Activities");
             fab.setVisibility(View.VISIBLE);
         }
         if(!frag.equals(filters)) {
@@ -215,6 +218,8 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if(!currentFragment.equals(mapFragment)){
+            changeFragment(mapFragment);
         } else {
             super.onBackPressed();
         }
@@ -255,16 +260,16 @@ public class MainActivity extends AppCompatActivity
 
         if  (id == R.id.nav_myevents) {
             changeFragment(bfrag);
-            getSupportActionBar().setTitle("My Events");
+            getSupportActionBar().setTitle("My Activities");
 
         } else if (id == R.id.nav_joinedevents) {
             changeFragment(bfrag);
-            getSupportActionBar().setTitle("Joined Events");
+            getSupportActionBar().setTitle("Joined Activities");
 
         } else if (id == R.id.nav_search) {
             changeFragment(mapFragment);
-            setupList();
-            getSupportActionBar().setTitle("Find Events");
+            //setupList();
+            getSupportActionBar().setTitle("Find Activities");
         }
 
 

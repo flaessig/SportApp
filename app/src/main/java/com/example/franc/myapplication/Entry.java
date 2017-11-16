@@ -38,7 +38,8 @@ public class Entry extends Object {
         numberMax = 20;
         cost = "free";
         types = EnumSet.noneOf(ActivityType.class);
-
+        types.add(ActivityType.RUNNING);
+        if(title.equals("Swimming")) types.add(ActivityType.SWIMMING);
 
     }
 

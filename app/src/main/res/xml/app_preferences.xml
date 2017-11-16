@@ -29,6 +29,8 @@
 
         </android.support.v7.preference.PreferenceCategory>
 
+    <android.support.v7.preference.PreferenceCategory
+        android:title="Other">
 
     <android.support.v7.preference.SwitchPreferenceCompat
         android:key="key1"
@@ -42,6 +44,6 @@
         android:summary="EditText Summary"
         android:dialogMessage="Dialog Message"
         android:defaultValue="Default value" />
-
+    </android.support.v7.preference.PreferenceCategory>
 
 </android.support.v7.preference.PreferenceScreen>
