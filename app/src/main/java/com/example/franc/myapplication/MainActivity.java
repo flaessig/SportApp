@@ -75,13 +75,13 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 changeFragment(newAct);
+                getSupportActionBar().setTitle("Create Activity");
             }
         });
         applyFiltersButton = (Button) findViewById(R.id.apply_filters_button);
         applyFiltersButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 applyFilters();
-                getSupportActionBar().setTitle("Create Activity");
             }
         });
         applyFiltersButton.setVisibility(View.INVISIBLE);
